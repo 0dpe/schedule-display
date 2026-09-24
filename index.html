@@ -64,6 +64,52 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      position: relative;
+    }
+
+    .menu-toggle {
+      width: 28px;
+      height: 28px;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .action-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      max-width: calc(100vw - 16px);
+      max-height: calc(100vh - 16px);
+      overflow-y: auto;
+      display: none;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      min-width: 170px;
+      padding: 6px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      z-index: 40;
+    }
+
+    .action-menu.open {
+      display: flex;
+    }
+
+    .action-menu button {
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    .action-menu #btnReset {
+      background-color: var(--danger);
+      color: #fff;
+    }
+
+    .action-menu #btnReset:hover {
+      background-color: #dc2626;
     }
 
     button {
@@ -103,6 +149,7 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
+      min-width: 0;
       gap: 10px;
       z-index: 25;
     }
@@ -111,6 +158,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      min-width: 0;
     }
 
     /* View Switcher: Day vs Week */
@@ -162,8 +210,8 @@
     .date-title {
       font-size: 0.95rem;
       font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
+      white-space: normal;
+      overflow-wrap: anywhere;
       text-overflow: ellipsis;
     }
 
@@ -342,15 +390,8 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      cursor: pointer;
-      transition: transform 0.1s ease, filter 0.15s ease;
+      pointer-events: none;
       z-index: 5;
-    }
-
-    .event-card:hover {
-      filter: brightness(1.12);
-      transform: scale(1.01);
-      z-index: 10;
     }
 
     .event-header {
@@ -537,6 +578,16 @@
 
     /* Small screens / Mobile */
     @media (max-width: 640px) {
+      .left-controls {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .date-title-box {
+        flex-basis: 100%;
+        max-width: 100%;
+      }
+
       .gutter-corner, .time-gutter {
         width: 54px;
         min-width: 54px;
@@ -547,9 +598,6 @@
       }
       .day-col {
         min-width: 95px;
-      }
-      .date-title-box {
-        max-width: 110px;
       }
       .date-title {
         font-size: 0.78rem;
@@ -574,25 +622,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Top Navbar -->
-  <header>
-    <div class="header-actions">
-      <button id="btnImportPaste" class="btn-primary" title="Paste JSON schedule">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"></path></svg>
-        Add / Paste JSON
-      </button>
-      <button id="btnExport" title="Export schedule as plain text">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        Export
-      </button>
-      <button id="btnImport" title="Import schedule plain text">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-        Import
-      </button>
-      <button id="btnReset" title="Clear the entire saved schedule">Reset</button>
-    </div>
-  </header>
 
   <!-- Controls: View switch, Date Nav, Zoom -->
   <div class="controls-bar">
@@ -619,8 +648,18 @@
     <div class="right-controls">
       <div class="zoom-controls">
         <button id="btnZoomOut" title="Zoom out timeline">−</button>
-        <span id="zoomLevel">1.6x</span>
         <button id="btnZoomIn" title="Zoom in timeline">+</button>
+      </div>
+      <div class="header-actions">
+        <button id="btnActionMenu" class="menu-toggle" title="Schedule actions" aria-label="Schedule actions" aria-expanded="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+        </button>
+        <div id="actionMenu" class="action-menu">
+          <button id="btnImportPaste" class="btn-primary" title="Paste JSON schedule">Add / Paste JSON</button>
+          <button id="btnExport" title="Export schedule as plain text">Export</button>
+          <button id="btnImport" title="Import schedule plain text">Import</button>
+          <button id="btnReset" title="Clear the entire saved schedule">Reset</button>
+        </div>
       </div>
     </div>
   </div>
@@ -801,6 +840,50 @@
       return days;
     }
 
+    function normalizeCourseCode(rawCode) {
+      const code = String(rawCode || "COURSE").trim();
+      const match = code.match(/^([a-zA-Z]+)\s*(\d+)/);
+      return match ? `${match[1].toUpperCase()}-${match[2]}` : code.toUpperCase();
+    }
+
+    function normalizeScheduleData(data) {
+      const normalized = { courses: {}, events: [] };
+      let colorCounter = 0;
+
+      (data.courses ? Object.values(data.courses) : []).forEach(course => {
+        const courseCode = normalizeCourseCode(course.code);
+        if (!normalized.courses[courseCode]) {
+          normalized.courses[courseCode] = {
+            code: courseCode,
+            colorIndex: colorCounter % COURSE_PALETTE.length
+          };
+          colorCounter++;
+        }
+      });
+
+      (data.events || []).forEach(event => {
+        const courseCode = normalizeCourseCode(event.courseCode);
+        if (!normalized.courses[courseCode]) {
+          normalized.courses[courseCode] = {
+            code: courseCode,
+            colorIndex: colorCounter % COURSE_PALETTE.length
+          };
+          colorCounter++;
+        }
+
+        const normalizedEvent = {
+          ...event,
+          courseCode,
+          id: `${courseCode}_${event.dateStr}_${event.startMin}_${event.endMin}_${event.methodText || "Class"}`
+        };
+        if (!normalized.events.some(existing => existing.id === normalizedEvent.id)) {
+          normalized.events.push(normalizedEvent);
+        }
+      });
+
+      return normalized;
+    }
+
     /* -------------------------------------------------------------
        PARSE SAP ODATA JSON
     ------------------------------------------------------------- */
@@ -824,10 +907,9 @@
 
       rawResults.forEach((eventObj) => {
         // Normalize course code e.g. "CSE011-LE" -> "CSE 011"
-        const rawCode = (eventObj.DShort || eventObj.EventShort || "COURSE").trim();
-        const courseCode = rawCode.replace(/([a-zA-Z]+)(\d+)/, "$1 $2");
+        const courseCode = normalizeCourseCode(eventObj.DShort || eventObj.EventShort || "COURSE");
         const baseMethod = eventObj.MethodText || eventObj.Method || "Class";
-        const room = eventObj.RoomShort || eventObj.RoomStext || "TBD";
+        const room = eventObj.RoomShort || eventObj.RoomStext || eventObj.DeliveryModeText || "TBD";
 
         if (!scheduleDatabase.courses[courseCode]) {
           scheduleDatabase.courses[courseCode] = {
@@ -908,7 +990,8 @@
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
-          scheduleDatabase = JSON.parse(raw);
+          scheduleDatabase = normalizeScheduleData(JSON.parse(raw));
+          saveState();
         }
       } catch (e) {
         console.error("Could not load from localStorage:", e);
@@ -1201,7 +1284,6 @@
 
     function setZoom(newZoom) {
       pxPerMinute = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, parseFloat(newZoom.toFixed(2))));
-      document.getElementById("zoomLevel").textContent = `${pxPerMinute.toFixed(1)}x`;
       render();
     }
 
@@ -1212,6 +1294,42 @@
     const exportModal = document.getElementById("exportModal");
     const jsonInput = document.getElementById("jsonInput");
     const fileUpload = document.getElementById("fileUpload");
+    const actionMenu = document.getElementById("actionMenu");
+
+    const actionMenuButton = document.getElementById("btnActionMenu");
+
+    function closeActionMenu() {
+      actionMenu.classList.remove("open");
+      actionMenu.style.left = "";
+      actionMenu.style.top = "";
+      actionMenu.style.right = "";
+      actionMenu.style.position = "";
+      actionMenuButton.setAttribute("aria-expanded", "false");
+    }
+
+    document.getElementById("btnActionMenu").onclick = (event) => {
+      event.stopPropagation();
+      const isOpen = actionMenu.classList.toggle("open");
+      actionMenuButton.setAttribute("aria-expanded", String(isOpen));
+
+      if (isOpen) {
+        actionMenu.style.position = "fixed";
+        actionMenu.style.right = "auto";
+        const buttonRect = actionMenuButton.getBoundingClientRect();
+        const menuRect = actionMenu.getBoundingClientRect();
+        const left = Math.min(buttonRect.right - menuRect.width, window.innerWidth - menuRect.width - 8);
+        const belowTop = buttonRect.bottom + 6;
+        const top = belowTop + menuRect.height <= window.innerHeight - 8
+          ? belowTop
+          : Math.max(8, buttonRect.top - menuRect.height - 6);
+        actionMenu.style.left = `${Math.max(8, left)}px`;
+        actionMenu.style.top = `${top}px`;
+      }
+    };
+
+    document.addEventListener("click", () => {
+      closeActionMenu();
+    });
 
     // View toggle listeners
     document.getElementById("btnViewDay").onclick = () => {
@@ -1288,7 +1406,7 @@
       try {
         const parsed = JSON.parse(raw);
         if (parsed.courses && parsed.events) {
-          scheduleDatabase = parsed;
+          scheduleDatabase = normalizeScheduleData(parsed);
           saveState();
         } else {
           ingestSapJson(parsed);
