@@ -157,6 +157,8 @@
       overflow-x: auto;
       scrollbar-width: none;
       z-index: 25;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .controls-bar::-webkit-scrollbar {
@@ -187,6 +189,7 @@
       border-radius: 8px;
       padding: 2px;
       border: 1px solid var(--surface-border);
+      height: 30px;
     }
 
     .view-toggle button {
@@ -194,6 +197,8 @@
       padding: 5px 12px;
       font-size: 0.8rem;
       border-radius: 6px;
+      height: 24px;
+      min-height: 24px;
     }
 
     .view-toggle button.active {
@@ -216,6 +221,20 @@
       flex: 0 0 28px;
       justify-content: center;
       padding: 0;
+    }
+
+    .controls-bar button,
+    .controls-bar input[type="date"] {
+      min-height: 30px;
+    }
+
+    .controls-bar .view-toggle button {
+      height: 24px;
+      min-height: 24px;
+    }
+
+    .controls-bar input[type="date"] {
+      height: 30px;
     }
 
     .date-nav input[type="date"] {
@@ -290,6 +309,8 @@
       position: relative;
       background: var(--bg);
       -webkit-overflow-scrolling: touch;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .timeline-wrapper {
@@ -682,7 +703,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
         </button>
         <div id="actionMenu" class="action-menu">
-          <button id="btnImportPaste" class="btn-primary" title="Paste JSON schedule">Add / Paste JSON</button>
+          <button id="btnImportPaste" class="btn-primary" title="Paste JSON schedule">Paste JSON</button>
           <button id="btnExport" title="Export schedule as plain text">Export</button>
           <button id="btnImport" title="Import schedule plain text">Import</button>
           <button id="btnReset" title="Clear the entire saved schedule">Reset</button>
@@ -727,11 +748,11 @@
       </div>
       <div class="modal-body">
         <p style="font-size:0.83rem; color:var(--text-muted)">
-          Paste one or more college portal JSON documents (e.g., UCSD OData format). Data is stored safely inside your browser!
+          Paste one or more JSON documents (response from https://tss.ucsd.edu/sap/opu/odata/...). Data is stored locally inside your browser.
         </p>
         <textarea id="jsonInput" placeholder='{"d": { "results": [ ... ] }}'></textarea>
         <div>
-          <label style="font-size:0.83rem; color:var(--text-muted)">Or load text/json file: </label>
+          <label style="font-size:0.83rem; color:var(--text-muted)">Or load text/JSON file: </label>
           <input type="file" id="fileUpload" accept=".txt,.json" />
         </div>
       </div>
@@ -751,7 +772,7 @@
       </div>
       <div class="modal-body">
         <p style="font-size:0.83rem; color:var(--text-muted)">
-          Copy this plain text to easily import your schedule onto your phone or another browser:
+          Copy this plain text to easily import your schedule onto another browser:
         </p>
         <textarea id="exportOutput" readonly></textarea>
       </div>
@@ -1441,7 +1462,7 @@
 
     // Modal open/close listeners
     document.getElementById("btnImportPaste").onclick = () => {
-      document.getElementById("modalTitle").textContent = "Paste Course JSON";
+      document.getElementById("modalTitle").textContent = "Paste JSON";
       jsonInput.value = "";
       jsonModal.classList.add("open");
       jsonInput.focus();
