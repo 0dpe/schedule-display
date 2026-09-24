@@ -65,6 +65,7 @@
       align-items: center;
       gap: 8px;
       position: relative;
+      flex: 0 0 auto;
     }
 
     .menu-toggle {
@@ -161,6 +162,15 @@
       min-width: 0;
     }
 
+    .left-controls {
+      flex: 1 1 auto;
+    }
+
+    .right-controls {
+      flex: 0 0 auto;
+      margin-left: auto;
+    }
+
     /* View Switcher: Day vs Week */
     .view-toggle {
       display: flex;
@@ -187,6 +197,16 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+
+    .date-nav > button {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      justify-content: center;
+      padding: 0;
     }
 
     .date-nav input[type="date"] {
@@ -226,9 +246,18 @@
     }
 
     .zoom-controls {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
       display: flex;
       align-items: center;
       gap: 4px;
+      padding: 4px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      z-index: 35;
     }
 
     .zoom-controls span {
@@ -236,6 +265,13 @@
       color: var(--text-muted);
       min-width: 44px;
       text-align: center;
+    }
+
+    .zoom-controls button {
+      width: 28px;
+      height: 28px;
+      justify-content: center;
+      padding: 0;
     }
 
     /* Timeline Viewport & Container */
@@ -578,16 +614,6 @@
 
     /* Small screens / Mobile */
     @media (max-width: 640px) {
-      .left-controls {
-        width: 100%;
-        flex-wrap: wrap;
-      }
-
-      .date-title-box {
-        flex-basis: 100%;
-        max-width: 100%;
-      }
-
       .gutter-corner, .time-gutter {
         width: 54px;
         min-width: 54px;
@@ -618,6 +644,11 @@
       .event-badge {
         font-size: 0.6rem;
       }
+
+      .zoom-controls {
+        right: 10px;
+        bottom: 10px;
+      }
     }
   </style>
 </head>
@@ -636,20 +667,13 @@
         <button id="btnPrev" title="Previous day or week">◀</button>
         <input type="date" id="datePicker" />
         <button id="btnNext" title="Next day or week">▶</button>
-        <button id="btnToday">Today</button>
-      </div>
-
-      <div class="date-title-box">
-        <span id="dateDisplayLabel" class="date-title"></span>
-        <span id="dateRelativeBadge" class="date-badge" style="display:none;"></span>
+        <button id="btnToday" title="Go to today" aria-label="Go to today">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+        </button>
       </div>
     </div>
 
     <div class="right-controls">
-      <div class="zoom-controls">
-        <button id="btnZoomOut" title="Zoom out timeline">−</button>
-        <button id="btnZoomIn" title="Zoom in timeline">+</button>
-      </div>
       <div class="header-actions">
         <button id="btnActionMenu" class="menu-toggle" title="Schedule actions" aria-label="Schedule actions" aria-expanded="false">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
@@ -662,6 +686,11 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="zoom-controls" aria-label="Timeline zoom controls">
+    <button id="btnZoomOut" title="Zoom out timeline" aria-label="Zoom out timeline">−</button>
+    <button id="btnZoomIn" title="Zoom in timeline" aria-label="Zoom in timeline">+</button>
   </div>
 
   <!-- Timeline Area -->
@@ -842,7 +871,7 @@
 
     function normalizeCourseCode(rawCode) {
       const code = String(rawCode || "COURSE").trim();
-      const match = code.match(/^([a-zA-Z]+)\s*(\d+)/);
+      const match = code.match(/^([a-zA-Z]+)\s*-?\s*(\d+[a-zA-Z]*)/);
       return match ? `${match[1].toUpperCase()}-${match[2]}` : code.toUpperCase();
     }
 
@@ -1080,8 +1109,6 @@
     ------------------------------------------------------------- */
     function render() {
       const picker = document.getElementById("datePicker");
-      const dateDisplay = document.getElementById("dateDisplayLabel");
-      const badge = document.getElementById("dateRelativeBadge");
       const timeGutter = document.getElementById("timeGutter");
       const horizontalGrid = document.getElementById("horizontalGrid");
       const daysHeaderRow = document.getElementById("daysHeaderRow");
@@ -1091,42 +1118,17 @@
 
       picker.value = selectedDateStr;
       const todayStr = getTodayDateStr();
-      const tomorrowStr = getTomorrowDateStr();
 
       // Determine active days array
       let displayDays = [];
       if (viewMode === "day") {
         displayDays = [selectedDateStr];
         daysHeaderRow.style.display = "none";
-        dateDisplay.textContent = formatDisplayDate(selectedDateStr);
-
-        if (selectedDateStr === todayStr) {
-          badge.style.display = "inline-block";
-          badge.textContent = "Today";
-        } else if (selectedDateStr === tomorrowStr) {
-          badge.style.display = "inline-block";
-          badge.textContent = "Tomorrow";
-        } else {
-          badge.style.display = "none";
-        }
       } else {
         // Week Mode (Monday through Sunday)
         displayDays = getWeekDays(selectedDateStr);
         daysHeaderRow.style.display = "flex";
 
-        const startParts = displayDays[0].split("-");
-        const endParts = displayDays[6].split("-");
-        const startD = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-        const endD = new Date(endParts[0], endParts[1] - 1, endParts[2]);
-        
-        dateDisplay.textContent = `${startD.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${endD.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
-        
-        if (displayDays.includes(todayStr)) {
-          badge.style.display = "inline-block";
-          badge.textContent = "Current Week";
-        } else {
-          badge.style.display = "none";
-        }
       }
 
       // Collect events across the visible period
@@ -1178,7 +1180,7 @@
           <div class="empty-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             <h3>No classes scheduled for this period</h3>
-            <p>Use the arrows above to browse other dates, or click "Add / Paste JSON" to import courses.</p>
+            <p>Use the arrows above to browse other dates, or click the edit button to import courses.</p>
           </div>
         `;
         return;
