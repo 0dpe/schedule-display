@@ -155,11 +155,16 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .date-title {
       font-size: 0.95rem;
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .date-badge {
@@ -206,6 +211,7 @@
       position: sticky;
       top: 0;
       display: flex;
+      min-width: max-content;
       background: #111a2e;
       border-bottom: 2px solid var(--surface-border);
       z-index: 20;
@@ -326,6 +332,7 @@
     /* Event Cards */
     .event-card {
       position: absolute;
+      container-type: inline-size;
       border-radius: 8px;
       padding: 6px 9px;
       color: #fff;
@@ -351,6 +358,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 4px;
+      min-width: 0;
     }
 
     .event-code {
@@ -371,6 +379,24 @@
       text-transform: uppercase;
       letter-spacing: 0.03em;
       white-space: nowrap;
+    }
+
+    @container (max-width: 150px) {
+      .event-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+      }
+
+      .event-code,
+      .event-badge {
+        max-width: 100%;
+      }
+
+      .event-badge {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
 
     .event-meta {
@@ -522,6 +548,12 @@
       .day-col {
         min-width: 95px;
       }
+      .date-title-box {
+        max-width: 110px;
+      }
+      .date-title {
+        font-size: 0.78rem;
+      }
       .day-column-header {
         min-width: 95px;
         padding: 6px 2px;
@@ -545,10 +577,6 @@
 
   <!-- Top Navbar -->
   <header>
-    <div class="brand">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="19" y2="10"></line></svg>
-      Class<span>Timeline</span>
-    </div>
     <div class="header-actions">
       <button id="btnImportPaste" class="btn-primary" title="Paste JSON schedule">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"></path></svg>
@@ -562,6 +590,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
         Import
       </button>
+      <button id="btnReset" title="Clear the entire saved schedule">Reset</button>
     </div>
   </header>
 
@@ -706,10 +735,7 @@
     function formatMinutesToTime(min) {
       let h = Math.floor(min / 60) % 24;
       let m = min % 60;
-      const ampm = h >= 12 ? "PM" : "AM";
-      h = h % 12;
-      if (h === 0) h = 12;
-      return `${h}:${m.toString().padStart(2, "0")} ${ampm}`;
+      return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
     }
 
     // Extract YYYY-MM-DD using UTC date values from /Date(timestamp)/
@@ -798,7 +824,7 @@
 
       rawResults.forEach((eventObj) => {
         // Normalize course code e.g. "CSE011-LE" -> "CSE 011"
-        const rawCode = (eventObj.DShort || eventObj.EventShort || "COURSE").split("-")[0].trim();
+        const rawCode = (eventObj.DShort || eventObj.EventShort || "COURSE").trim();
         const courseCode = rawCode.replace(/([a-zA-Z]+)(\d+)/, "$1 $2");
         const baseMethod = eventObj.MethodText || eventObj.Method || "Class";
         const room = eventObj.RoomShort || eventObj.RoomStext || "TBD";
@@ -868,6 +894,14 @@
       } catch (e) {
         console.error("Storage error:", e);
       }
+    }
+
+    function resetSchedule() {
+      if (!confirm("Clear the entire schedule? This cannot be undone.")) return;
+      scheduleDatabase = { courses: {}, events: [] };
+      localStorage.removeItem(STORAGE_KEY);
+      selectedDateStr = getTodayDateStr();
+      render();
     }
 
     function loadState() {
@@ -1229,6 +1263,8 @@
       document.getElementById("exportOutput").value = JSON.stringify(scheduleDatabase);
       exportModal.classList.add("open");
     };
+
+    document.getElementById("btnReset").onclick = resetSchedule;
 
     document.getElementById("btnCloseModal").onclick = () => jsonModal.classList.remove("open");
     document.getElementById("btnCancelModal").onclick = () => jsonModal.classList.remove("open");
