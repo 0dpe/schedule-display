@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local Storage Demo</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f8fafc;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --border: #334155;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      margin-top: 0;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .counter-display {
+      font-size: 4.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 16px 0 24px;
+      line-height: 1;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    button {
+      background-color: var(--accent);
+      color: #0f172a;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.05s ease;
+      touch-action: manipulation;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    button.secondary {
+      background-color: transparent;
+      color: #94a3b8;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    button.secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .sync-section {
+      text-align: left;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .sync-section textarea {
+      width: 100%;
+      box-sizing: border-box;
+      background: #0b1120;
+      border: 1px solid var(--border);
+      color: #e2e8f0;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: monospace;
+      resize: none;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Browser Storage Test</h1>
+    <div class="counter-display" id="display">0</div>
+
+    <div class="btn-group">
+      <button onclick="updateValue(-1)">- 1</button>
+      <button onclick="updateValue(1)">+ 1</button>
+    </div>
+
+    <div>
+      <button class="secondary" onclick="resetValue()">Reset</button>
+    </div>
+
+    <hr />
+
+    <div class="sync-section">
+      <strong>Transfer to Phone / Device:</strong>
+      <p style="margin: 4px 0 8px;">Copy this backup payload or paste one from another device:</p>
+      <textarea id="syncPayload" rows="2" placeholder="Paste data here..."></textarea>
+      
+      <div style="display: flex; gap: 8px;">
+        <button class="secondary" style="flex: 1;" onclick="copySyncData()">Copy Payload</button>
+        <button class="secondary" style="flex: 1;" onclick="loadSyncData()">Load Data</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "my_custom_schedule_test_int";
+    const display = document.getElementById("display");
+    const syncBox = document.getElementById("syncPayload");
+
+    // 1. Read existing value on start (defaults to 0 if empty)
+    function loadValue() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const val = stored !== null ? parseInt(stored, 10) : 0;
+      display.textContent = val;
+      syncBox.value = JSON.stringify({ number: val });
+      return val;
+    }
+
+    // 2. Increment/Decrement and persist
+    function updateValue(delta) {
+      let current = loadValue();
+      let updated = current + delta;
+      
+      // Save directly into the browser
+      localStorage.setItem(STORAGE_KEY, updated.toString());
+      
+      loadValue();
+    }
+
+    function resetValue() {
+      localStorage.removeItem(STORAGE_KEY);
+      loadValue();
+    }
+
+    // 3. Export / Import functions
+    function copySyncData() {
+      syncBox.select();
+      navigator.clipboard.writeText(syncBox.value);
+      alert("Copied payload to clipboard!");
+    }
+
+    function loadSyncData() {
+      try {
+        const parsed = JSON.parse(syncBox.value);
+        if (typeof parsed.number === "number") {
+          localStorage.setItem(STORAGE_KEY, parsed.number.toString());
+          loadValue();
+          alert("Import successful!");
+        } else {
+          alert("Invalid data format.");
+        }
+      } catch (err) {
+        alert("Could not parse payload. Make sure it's valid JSON.");
+      }
+    }
+
+    // Initial load when page opens
+    loadValue();
+  </script>
+</body>
+</html>
