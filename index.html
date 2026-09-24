@@ -724,7 +724,7 @@
       </div>
       <div class="modal-body">
         <p style="font-size:0.83rem; color:var(--text-muted)">
-          Paste your college portal JSON (e.g., UCSD OData format). Data is stored safely inside your browser!
+          Paste one or more college portal JSON documents (e.g., UCSD OData format). Data is stored safely inside your browser!
         </p>
         <textarea id="jsonInput" placeholder='{"d": { "results": [ ... ] }}'></textarea>
         <div>
@@ -911,6 +911,77 @@
       });
 
       return normalized;
+    }
+
+    function mergeScheduleData(data) {
+      const incoming = normalizeScheduleData(data);
+      scheduleDatabase = normalizeScheduleData(scheduleDatabase);
+
+      Object.entries(incoming.courses).forEach(([courseCode, course]) => {
+        if (!scheduleDatabase.courses[courseCode]) {
+          scheduleDatabase.courses[courseCode] = {
+            ...course,
+            colorIndex: Object.keys(scheduleDatabase.courses).length % COURSE_PALETTE.length
+          };
+        }
+      });
+
+      incoming.events.forEach(event => {
+        if (!scheduleDatabase.events.some(existing => existing.id === event.id)) {
+          scheduleDatabase.events.push(event);
+        }
+      });
+    }
+
+    function parseJsonDocuments(raw) {
+      const documents = [];
+      let index = 0;
+
+      while (index < raw.length) {
+        while (/\s/.test(raw[index])) index++;
+        if (index >= raw.length) break;
+
+        const start = index;
+        let depth = 0;
+        let inString = false;
+        let escaped = false;
+
+        for (; index < raw.length; index++) {
+          const character = raw[index];
+          if (inString) {
+            if (escaped) {
+              escaped = false;
+            } else if (character === "\\") {
+              escaped = true;
+            } else if (character === '"') {
+              inString = false;
+            }
+            continue;
+          }
+
+          if (character === '"') {
+            inString = true;
+          } else if (character === "{" || character === "[") {
+            depth++;
+          } else if (character === "}" || character === "]") {
+            depth--;
+            if (depth === 0) {
+              index++;
+              documents.push(JSON.parse(raw.slice(start, index)));
+              break;
+            }
+          }
+        }
+
+        if (depth !== 0) {
+          throw new Error("Could not find the end of a JSON document.");
+        }
+      }
+
+      if (documents.length === 0) {
+        throw new Error("Could not find valid JSON documents.");
+      }
+      return documents;
     }
 
     /* -------------------------------------------------------------
@@ -1406,13 +1477,23 @@
       const raw = jsonInput.value.trim();
       if (!raw) return alert("Please paste schedule data first!");
       try {
-        const parsed = JSON.parse(raw);
-        if (parsed.courses && parsed.events) {
-          scheduleDatabase = normalizeScheduleData(parsed);
-          saveState();
-        } else {
-          ingestSapJson(parsed);
-        }
+        const documents = parseJsonDocuments(raw);
+        let importedSchedule = false;
+
+        documents.forEach(parsed => {
+          if (parsed.courses && parsed.events) {
+            if (importedSchedule) {
+              mergeScheduleData(parsed);
+            } else {
+              scheduleDatabase = normalizeScheduleData(parsed);
+              importedSchedule = true;
+            }
+          } else {
+            ingestSapJson(parsed);
+          }
+        });
+
+        saveState();
         jsonModal.classList.remove("open");
         selectedDateStr = determineInitialDate();
         render();
