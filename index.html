@@ -2,202 +2,1449 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Local Storage Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Student Schedule</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --text: #f8fafc;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --border: #334155;
+      --bg-main: #0d1117;
+      --bg-card: #161b22;
+      --bg-card-hover: #1f242c;
+      --border: #30363d;
+      --border-light: #21262d;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --primary: #58a6ff;
+      --primary-glow: rgba(88, 166, 255, 0.2);
+      --accent-red: #f85149;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      margin: 0;
-      padding: 24px;
-      font-family: system-ui, -apple-system, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
       min-height: 100vh;
-      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
     }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px 24px;
+    /* Header & Navigation */
+    header {
+      background: rgba(22, 27, 34, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 12px 16px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      max-width: 1200px;
+      margin: 0 auto;
       width: 100%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     }
 
-    h1 {
-      font-size: 1.25rem;
-      margin-top: 0;
-      color: #94a3b8;
-      font-weight: 500;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
     }
 
-    .counter-display {
-      font-size: 4.5rem;
-      font-weight: 700;
-      color: var(--accent);
-      margin: 16px 0 24px;
-      line-height: 1;
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #1f6feb, #8957e5);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
     }
 
     .btn-group {
       display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-bottom: 24px;
+      align-items: center;
+      gap: 8px;
     }
 
-    button {
-      background-color: var(--accent);
-      color: #0f172a;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.25rem;
-      font-weight: 600;
-      padding: 12px 20px;
-      cursor: pointer;
-      transition: background 0.15s ease, transform 0.05s ease;
-      touch-action: manipulation;
-    }
-
-    button:active {
-      transform: scale(0.96);
-    }
-
-    button.secondary {
-      background-color: transparent;
-      color: #94a3b8;
-      border: 1px solid var(--border);
-      font-size: 0.9rem;
-    }
-
-    button.secondary:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-    }
-
-    hr {
-      border: 0;
-      border-top: 1px solid var(--border);
-      margin: 24px 0;
-    }
-
-    .sync-section {
-      text-align: left;
+    button, .btn {
+      font-family: inherit;
       font-size: 0.85rem;
-      color: #94a3b8;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-main);
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
     }
 
-    .sync-section textarea {
-      width: 100%;
-      box-sizing: border-box;
-      background: #0b1120;
+    button:hover, .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--primary);
+    }
+
+    button.btn-primary {
+      background: #238636;
+      border-color: #2ea043;
+      color: #fff;
+    }
+    button.btn-primary:hover {
+      background: #2ea043;
+    }
+
+    /* Date controls bar */
+    .controls-strip {
+      max-width: 1200px;
+      margin: 10px auto 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .date-navigator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .current-date-display {
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 0 6px;
+      min-width: 180px;
+      text-align: center;
+    }
+
+    .date-picker-wrap input[type="date"] {
+      background: var(--bg-card);
       border: 1px solid var(--border);
-      color: #e2e8f0;
-      border-radius: 6px;
-      padding: 8px;
-      font-family: monospace;
-      resize: none;
-      margin: 8px 0;
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .zoom-widget {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .zoom-widget input[type="range"] {
+      width: 90px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Course Legend */
+    .course-legend-bar {
+      max-width: 1200px;
+      margin: 12px auto 0;
+      padding: 0 16px;
+      width: 100%;
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .course-legend-bar::-webkit-scrollbar { display: none; }
+
+    .legend-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .legend-chip .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 12px auto;
+      padding: 0 16px 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Schedule View */
+    .schedule-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      box-shadow: var(--shadow);
+      max-height: calc(100vh - 180px);
+    }
+
+    .schedule-canvas {
+      position: relative;
+      width: 100%;
+      display: flex;
+    }
+
+    /* Time Axis */
+    .time-axis {
+      width: 75px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      background: rgba(13, 17, 23, 0.4);
+      position: relative;
+      user-select: none;
+    }
+
+    .time-tick {
+      position: absolute;
+      width: 100%;
+      transform: translateY(-50%);
+      text-align: right;
+      padding-right: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Event Grid Area */
+    .events-board {
+      flex: 1;
+      position: relative;
+      background-size: 100% 100%;
+    }
+
+    .grid-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border-light);
+      pointer-events: none;
+    }
+
+    .grid-line.major {
+      background: rgba(48, 54, 61, 0.8);
+    }
+
+    /* Current Time Indicator Line */
+    .current-time-marker {
+      position: absolute;
+      left: -75px;
+      right: 0;
+      height: 2px;
+      background: var(--accent-red);
+      z-index: 30;
+      pointer-events: none;
+      box-shadow: 0 0 8px rgba(248, 81, 73, 0.6);
+    }
+
+    .current-time-marker::before {
+      content: '';
+      position: absolute;
+      left: 68px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-red);
+      animation: pulseDot 1.5s infinite;
+    }
+
+    @keyframes pulseDot {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Event Cards */
+    .event-card {
+      position: absolute;
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 3px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      border-left: 4px solid rgba(255, 255, 255, 0.7);
+      transition: transform 0.15s ease, filter 0.15s ease, z-index 0s;
+      z-index: 10;
+    }
+
+    .event-card:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.12);
+      z-index: 25;
+    }
+
+    .event-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .event-code {
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: -0.01em;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .method-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.35);
+      letter-spacing: 0.05em;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .event-title {
+      font-size: 0.78rem;
+      opacity: 0.95;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+    }
+
+    .event-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      opacity: 0.9;
+      margin-top: auto;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .event-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    /* Empty state */
+    .empty-schedule {
+      padding: 80px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .empty-schedule h3 {
+      font-size: 1.25rem;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .form-group input, .form-group textarea {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .form-group textarea {
+      resize: vertical;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .helper-callout {
+      background: rgba(88, 166, 255, 0.08);
+      border: 1px solid rgba(88, 166, 255, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      color: #93c5fd;
+      line-height: 1.45;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      font-size: 0.85rem;
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: transparent;
+    }
+
+    /* Details Drawer */
+    .drawer-details {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .drawer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 6px;
+    }
+    .drawer-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .drawer-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .drawer-value {
+      font-weight: 600;
+      text-align: right;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-top {
+        flex-wrap: wrap;
+      }
+      .brand {
+        font-size: 1rem;
+      }
+      .controls-strip {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .date-navigator {
+        justify-content: space-between;
+      }
+      .current-date-display {
+        min-width: auto;
+        font-size: 0.95rem;
+      }
+      .time-axis {
+        width: 60px;
+      }
+      .time-tick {
+        font-size: 0.68rem;
+        padding-right: 6px;
+      }
+      .schedule-wrapper {
+        max-height: calc(100vh - 240px);
+      }
+      .zoom-widget {
+        display: none; /* Auto-fit on mobile */
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h1>Browser Storage Test</h1>
-    <div class="counter-display" id="display">0</div>
-
-    <div class="btn-group">
-      <button onclick="updateValue(-1)">- 1</button>
-      <button onclick="updateValue(1)">+ 1</button>
+  <!-- Header -->
+  <header>
+    <div class="header-top">
+      <div class="brand">
+        <div class="brand-icon">📅</div>
+        <span>UCSD Class Schedule</span>
+      </div>
+      <div class="btn-group">
+        <button id="btnOpenFetchModal">➕ Add Courses</button>
+        <button id="btnOpenExportModal">💾 Import / Export</button>
+      </div>
     </div>
 
-    <div>
-      <button class="secondary" onclick="resetValue()">Reset</button>
+    <!-- Date navigation & controls -->
+    <div class="controls-strip">
+      <div class="date-navigator">
+        <button id="btnPrevDay" title="Previous Day">◀</button>
+        <button id="btnToday" class="btn-primary">Today</button>
+        <button id="btnTomorrow">Tomorrow</button>
+        <button id="btnNextDay" title="Next Day">▶</button>
+        <button id="btnNextEvent" title="Jump to next day with events">Next Class ⏩</button>
+      </div>
+
+      <div class="current-date-display" id="dateTitle">Loading...</div>
+
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <div class="date-picker-wrap">
+          <input type="date" id="datePicker" />
+        </div>
+        <div class="zoom-widget">
+          <span>🔍 Zoom</span>
+          <input type="range" id="zoomSlider" min="0.8" max="3.2" step="0.1" value="1.6" />
+        </div>
+      </div>
     </div>
+  </header>
 
-    <hr />
+  <!-- Registered courses legend -->
+  <div class="course-legend-bar" id="courseLegend"></div>
 
-    <div class="sync-section">
-      <strong>Transfer to Phone / Device:</strong>
-      <p style="margin: 4px 0 8px;">Copy this backup payload or paste one from another device:</p>
-      <textarea id="syncPayload" rows="2" placeholder="Paste data here..."></textarea>
-      
-      <div style="display: flex; gap: 8px;">
-        <button class="secondary" style="flex: 1;" onclick="copySyncData()">Copy Payload</button>
-        <button class="secondary" style="flex: 1;" onclick="loadSyncData()">Load Data</button>
+  <!-- Schedule view -->
+  <main>
+    <div class="schedule-wrapper" id="scheduleWrapper">
+      <div class="schedule-canvas" id="scheduleCanvas">
+        <div class="time-axis" id="timeAxis"></div>
+        <div class="events-board" id="eventsBoard"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Course Data Modal -->
+  <div class="modal-overlay" id="fetchModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add UCSD Course Data</h3>
+        <button class="close-modal" onclick="closeModals()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchDataTab('scrape')">Web Fetch (URL + Cookie)</button>
+          <button class="tab-btn" onclick="switchDataTab('json')">Paste Raw JSON Response</button>
+        </div>
+
+        <div id="tabScrape">
+          <div class="helper-callout">
+            <strong>Browser Note:</strong> When hosted on GitHub Pages, requests to UCSD's SAP servers require bypassing CORS and the browser's restricted <code>Cookie</code> header. You can use the fetcher below (via proxy) or paste the JSON response directly in the <em>Paste Raw JSON</em> tab.
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label>Course OData URLs (one per line):</label>
+            <textarea id="urlInput" rows="3" placeholder="https://tss.ucsd.edu/sap/opu/odata/ITUS/PR_MY_MODULES_V2_SRV/ModuleHeaderSet(...)/Event?..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Cookie Header:</label>
+            <input type="text" id="cookieInput" placeholder="single-line-very-long-text" />
+          </div>
+          <div class="form-group">
+            <label>CORS Proxy (optional, default provided):</label>
+            <input type="text" id="proxyInput" value="https://corsproxy.io/?" />
+          </div>
+          <button class="btn-primary" id="btnRunFetch" style="margin-top: 8px;">Fetch Courses</button>
+        </div>
+
+        <div id="tabJson" style="display: none;">
+          <div class="form-group">
+            <label>Paste the JSON output from UCSD OData endpoint:</label>
+            <textarea id="rawJsonInput" rows="8" placeholder='{"d": {"results": [...]}}'></textarea>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-primary" id="btnImportRawJson">Import Parsed JSON</button>
+            <button id="btnLoadSampleData">Load Sample Data</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Export/Import Modal -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Import / Export Schedule</h3>
+        <button class="close-modal" onclick="closeModals()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Your schedule is saved locally in this browser. To view on another device or backup, copy the plain text below or paste it on another device:
+        </p>
+        <div class="form-group">
+          <label>Schedule Plain Text Data (JSON):</label>
+          <textarea id="exportArea" rows="9"></textarea>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="btnCopyExport" class="btn-primary">📋 Copy to Clipboard</button>
+          <button id="btnDownloadExport">💾 Download File</button>
+          <button id="btnApplyImport" style="background:#8957e5; border-color:#a371f7;">📥 Import Pasted Text</button>
+          <button id="btnClearData" style="background:var(--accent-red); border-color:#da3633; margin-left: auto;">Reset All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Detail Modal -->
+  <div class="modal-overlay" id="eventModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalEventCourse">Course Details</h3>
+        <button class="close-modal" onclick="closeModals()">✕</button>
+      </div>
+      <div class="modal-body" id="modalEventBody"></div>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = "my_custom_schedule_test_int";
-    const display = document.getElementById("display");
-    const syncBox = document.getElementById("syncPayload");
+    /* =========================================================================
+       Course Colors & Palette Generator
+       ========================================================================= */
+    const PALETTE = [
+      { bg: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', hex: '#3b82f6' },
+      { bg: 'linear-gradient(135deg, #065f46, #10b981)', hex: '#10b981' },
+      { bg: 'linear-gradient(135deg, #581c87, #8b5cf6)', hex: '#8b5cf6' },
+      { bg: 'linear-gradient(135deg, #831843, #ec4899)', hex: '#ec4899' },
+      { bg: 'linear-gradient(135deg, #7c2d12, #f97316)', hex: '#f97316' },
+      { bg: 'linear-gradient(135deg, #134e4a, #14b8a6)', hex: '#14b8a6' },
+      { bg: 'linear-gradient(135deg, #701a75, #d946ef)', hex: '#d946ef' },
+      { bg: 'linear-gradient(135deg, #1c1917, #64748b)', hex: '#64748b' }
+    ];
 
-    // 1. Read existing value on start (defaults to 0 if empty)
-    function loadValue() {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const val = stored !== null ? parseInt(stored, 10) : 0;
-      display.textContent = val;
-      syncBox.value = JSON.stringify({ number: val });
-      return val;
+    let courseColorMap = {};
+
+    function getCourseColor(courseId) {
+      if (!courseColorMap[courseId]) {
+        const index = Object.keys(courseColorMap).length % PALETTE.length;
+        courseColorMap[courseId] = PALETTE[index];
+      }
+      return courseColorMap[courseId];
     }
 
-    // 2. Increment/Decrement and persist
-    function updateValue(delta) {
-      let current = loadValue();
-      let updated = current + delta;
-      
-      // Save directly into the browser
-      localStorage.setItem(STORAGE_KEY, updated.toString());
-      
-      loadValue();
+    /* =========================================================================
+       State Management & Local Storage
+       ========================================================================= */
+    const STORAGE_KEY = 'ucsd_student_schedule_data';
+    let scheduleEvents = []; // Master list of individual event meetings
+    let selectedDate = new Date(); // Currently displayed date
+    let pxPerMinute = 1.6; // Vertical zoom
+
+    // ISO Duration parser: e.g. "PT18H30M00S" -> 1110 minutes
+    function parseDurationMinutes(durationStr) {
+      if (!durationStr) return 0;
+      const match = durationStr.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      if (!match) return 0;
+      const hours = parseInt(match[1] || '0', 10);
+      const minutes = parseInt(match[2] || '0', 10);
+      return hours * 60 + minutes;
     }
 
-    function resetValue() {
-      localStorage.removeItem(STORAGE_KEY);
-      loadValue();
+    // SAP OData Date parser: "/Date(1790553600000)/" -> UTC Date String "YYYY-MM-DD"
+    function parseSapDate(dateStr) {
+      if (!dateStr) return null;
+      const match = dateStr.match(/\/Date\((\d+)(?:[+-]\d+)?\)\//);
+      if (!match) return null;
+      const ts = parseInt(match[1], 10);
+      const d = new Date(ts);
+      // In SAP OData, midnight UTC indicates the calendar date:
+      const y = d.getUTCFullYear();
+      const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
     }
 
-    // 3. Export / Import functions
-    function copySyncData() {
-      syncBox.select();
-      navigator.clipboard.writeText(syncBox.value);
-      alert("Copied payload to clipboard!");
+    function formatTime12h(totalMinutes) {
+      const h24 = Math.floor(totalMinutes / 60) % 24;
+      const m = totalMinutes % 60;
+      const ampm = h24 >= 12 ? 'PM' : 'AM';
+      const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+      return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
     }
 
-    function loadSyncData() {
-      try {
-        const parsed = JSON.parse(syncBox.value);
-        if (typeof parsed.number === "number") {
-          localStorage.setItem(STORAGE_KEY, parsed.number.toString());
-          loadValue();
-          alert("Import successful!");
+    function formatDateKey(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function parseDateKey(keyStr) {
+      const [y, m, d] = keyStr.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    /* =========================================================================
+       Data Parsing from UCSD OData Response
+       ========================================================================= */
+    function ingestODataResults(resultsArray) {
+      if (!Array.isArray(resultsArray)) return;
+
+      resultsArray.forEach(courseEvent => {
+        const courseId = courseEvent.SmObjid || courseEvent.DShort || courseEvent.DStext || 'COURSE';
+        const courseName = courseEvent.DShort || courseEvent.DStext || courseEvent.SmStext;
+        const fullTitle = courseEvent.SmStext || '';
+        const methodText = courseEvent.MethodText || courseEvent.Method || 'Class';
+        const room = courseEvent.RoomShort || courseEvent.RoomStext || 'TBD';
+        const instructor = courseEvent.InstrText || 'TBA';
+        const deliveryMode = courseEvent.DeliveryModeText || '';
+
+        // Check if EventSchedule contains instances
+        const scheduleList = courseEvent.EventSchedule && courseEvent.EventSchedule.results 
+          ? courseEvent.EventSchedule.results 
+          : [];
+
+        if (scheduleList.length > 0) {
+          scheduleList.forEach(item => {
+            const dateKey = parseSapDate(item.EventDate);
+            if (!dateKey) return;
+
+            const startMin = parseDurationMinutes(item.StartTime);
+            const endMin = parseDurationMinutes(item.EndTime);
+            const meetingType = item.MeetingTypeText || methodText;
+
+            scheduleEvents.push({
+              id: item.__metadata ? item.__metadata.id : (courseId + '_' + dateKey + '_' + startMin),
+              courseId,
+              courseName,
+              fullTitle,
+              methodText: meetingType,
+              dateKey,
+              startMin,
+              endMin,
+              room,
+              instructor,
+              deliveryMode,
+              scheduleText: courseEvent.ScheduleText || ''
+            });
+          });
         } else {
-          alert("Invalid data format.");
+          // Fallback if EventSchedule was not expanded
+          const dateKey = parseSapDate(courseEvent.EventDate);
+          if (dateKey) {
+            scheduleEvents.push({
+              id: courseEvent.__metadata ? courseEvent.__metadata.id : (courseId + '_' + dateKey),
+              courseId,
+              courseName,
+              fullTitle,
+              methodText,
+              dateKey,
+              startMin: parseDurationMinutes(courseEvent.StartTime),
+              endMin: parseDurationMinutes(courseEvent.EndTime),
+              room,
+              instructor,
+              deliveryMode,
+              scheduleText: courseEvent.ScheduleText || ''
+            });
+          }
         }
-      } catch (err) {
-        alert("Could not parse payload. Make sure it's valid JSON.");
+      });
+
+      // Deduplicate by courseId + dateKey + startMin + methodText
+      const seen = new Set();
+      scheduleEvents = scheduleEvents.filter(ev => {
+        const key = `${ev.courseId}_${ev.dateKey}_${ev.startMin}_${ev.methodText}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      saveToStorage();
+      renderCourseLegend();
+    }
+
+    function saveToStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleEvents));
+    }
+
+    function loadFromStorage() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          scheduleEvents = JSON.parse(raw);
+          renderCourseLegend();
+        } catch (e) {
+          console.error("Failed to load local schedule data", e);
+        }
       }
     }
 
-    // Initial load when page opens
-    loadValue();
+    /* =========================================================================
+       Smart Initial Date Determination
+       - Today if events remain today
+       - Tomorrow if today has passed
+       - Next future event if none on today or tomorrow
+       ========================================================================= */
+    function determineInitialDate() {
+      if (scheduleEvents.length === 0) {
+        return new Date();
+      }
+
+      const now = new Date();
+      const todayKey = formatDateKey(now);
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      const todayEvents = scheduleEvents.filter(e => e.dateKey === todayKey);
+      if (todayEvents.length > 0) {
+        const maxEnd = Math.max(...todayEvents.map(e => e.endMin));
+        if (currentMinutes < maxEnd) {
+          return now; // Display today
+        }
+      }
+
+      // Check tomorrow
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowKey = formatDateKey(tomorrow);
+      const tomorrowEvents = scheduleEvents.filter(e => e.dateKey === tomorrowKey);
+      if (tomorrowEvents.length > 0) {
+        return tomorrow;
+      }
+
+      // Find next future date with events
+      const futureDates = [...new Set(scheduleEvents.map(e => e.dateKey))]
+        .filter(dKey => dKey >= todayKey)
+        .sort();
+
+      if (futureDates.length > 0) {
+        return parseDateKey(futureDates[0]);
+      }
+
+      // Fallback: earliest event in schedule
+      const allDates = [...new Set(scheduleEvents.map(e => e.dateKey))].sort();
+      return parseDateKey(allDates[0]);
+    }
+
+    /* =========================================================================
+       Render Course Legend Bar
+       ========================================================================= */
+    function renderCourseLegend() {
+      const legendBar = document.getElementById('courseLegend');
+      legendBar.innerHTML = '';
+      const uniqueCourses = [...new Set(scheduleEvents.map(e => e.courseName))];
+
+      uniqueCourses.forEach(name => {
+        const chip = document.createElement('div');
+        chip.className = 'legend-chip';
+        const color = getCourseColor(name);
+        chip.innerHTML = `
+          <div class="dot" style="background:${color.hex}; box-shadow:0 0 6px ${color.hex}"></div>
+          <span>${name}</span>
+        `;
+        legendBar.appendChild(chip);
+      });
+    }
+
+    /* =========================================================================
+       Render Schedule Canvas (Minute-by-Minute with Dynamic Zoom)
+       ========================================================================= */
+    function renderSchedule() {
+      const dateKey = formatDateKey(selectedDate);
+      const dateTitle = document.getElementById('dateTitle');
+      const datePicker = document.getElementById('datePicker');
+      datePicker.value = dateKey;
+
+      const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+      dateTitle.textContent = selectedDate.toLocaleDateString('en-US', options);
+
+      const dayEvents = scheduleEvents
+        .filter(e => e.dateKey === dateKey)
+        .sort((a, b) => a.startMin - b.startMin || (b.endMin - b.startMin) - (a.endMin - a.startMin));
+
+      const timeAxis = document.getElementById('timeAxis');
+      const eventsBoard = document.getElementById('eventsBoard');
+      timeAxis.innerHTML = '';
+      eventsBoard.innerHTML = '';
+
+      if (dayEvents.length === 0) {
+        eventsBoard.innerHTML = `
+          <div class="empty-schedule">
+            <h3>No classes scheduled for this day</h3>
+            <p>Enjoy your break, or click <strong>Next Class ⏩</strong> to view upcoming sessions.</p>
+          </div>
+        `;
+        timeAxis.style.height = '240px';
+        return;
+      }
+
+      // Determine time bounds for the day
+      const earliestMin = Math.min(...dayEvents.map(e => e.startMin));
+      const latestMin = Math.max(...dayEvents.map(e => e.endMin));
+
+      // Pad bounds to clean hour marks
+      const startHour = Math.max(0, Math.floor((earliestMin - 20) / 60));
+      const endHour = Math.min(24, Math.ceil((latestMin + 20) / 60));
+
+      const totalMinutesSpan = (endHour - startHour) * 60;
+      const totalHeight = totalMinutesSpan * pxPerMinute;
+
+      timeAxis.style.height = `${totalHeight}px`;
+      eventsBoard.style.height = `${totalHeight}px`;
+
+      // Draw Hourly & Half-hourly grid lines + labels
+      for (let h = startHour; h <= endHour; h++) {
+        const minuteOffset = (h - startHour) * 60;
+        const topPx = minuteOffset * pxPerMinute;
+
+        // Label
+        if (h < endHour) {
+          const tick = document.createElement('div');
+          tick.className = 'time-tick';
+          tick.style.top = `${topPx}px`;
+          tick.textContent = formatTime12h(h * 60);
+          timeAxis.appendChild(tick);
+        }
+
+        // Major Hour line
+        const gridLine = document.createElement('div');
+        gridLine.className = 'grid-line major';
+        gridLine.style.top = `${topPx}px`;
+        eventsBoard.appendChild(gridLine);
+
+        // Half-hour subdivision line
+        if (h < endHour) {
+          const halfLine = document.createElement('div');
+          halfLine.className = 'grid-line';
+          halfLine.style.top = `${topPx + (30 * pxPerMinute)}px`;
+          eventsBoard.appendChild(halfLine);
+        }
+      }
+
+      // Real-time red indicator line if today is selected
+      const isToday = (formatDateKey(new Date()) === dateKey);
+      if (isToday) {
+        const now = new Date();
+        const currentMins = now.getHours() * 60 + now.getMinutes();
+        if (currentMins >= (startHour * 60) && currentMins <= (endHour * 60)) {
+          const markerTop = (currentMins - (startHour * 60)) * pxPerMinute;
+          const marker = document.createElement('div');
+          marker.className = 'current-time-marker';
+          marker.style.top = `${markerTop}px`;
+          eventsBoard.appendChild(marker);
+        }
+      }
+
+      // Handle Overlapping Events (Columns assignment)
+      const columns = [];
+      dayEvents.forEach(ev => {
+        let placed = false;
+        for (let i = 0; i < columns.length; i++) {
+          const lastInCol = columns[i][columns[i].length - 1];
+          if (ev.startMin >= lastInCol.endMin) {
+            columns[i].push(ev);
+            ev.colIndex = i;
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) {
+          ev.colIndex = columns.length;
+          columns.push([ev]);
+        }
+      });
+
+      const numCols = Math.max(1, columns.length);
+
+      // Render Event Cards
+      dayEvents.forEach(ev => {
+        const top = (ev.startMin - (startHour * 60)) * pxPerMinute;
+        const height = Math.max(38, (ev.endMin - ev.startMin) * pxPerMinute - 4);
+        const colWidth = 100 / numCols;
+        const left = ev.colIndex * colWidth;
+
+        const card = document.createElement('div');
+        card.className = 'event-card';
+        const color = getCourseColor(ev.courseName);
+        card.style.background = color.bg;
+        card.style.top = `${top}px`;
+        card.style.height = `${height}px`;
+        card.style.left = `calc(${left}% + 4px)`;
+        card.style.width = `calc(${colWidth}% - 8px)`;
+
+        card.innerHTML = `
+          <div class="event-header">
+            <span class="event-code">${ev.courseName}</span>
+            <span class="method-badge">${ev.methodText}</span>
+          </div>
+          <div class="event-title" title="${ev.fullTitle}">${ev.fullTitle}</div>
+          <div class="event-meta">
+            <span>⏰ ${formatTime12h(ev.startMin)} - ${formatTime12h(ev.endMin)}</span>
+            <span>📍 ${ev.room}</span>
+          </div>
+        `;
+
+        card.onclick = () => showEventDetails(ev);
+        eventsBoard.appendChild(card);
+      });
+    }
+
+    function showEventDetails(ev) {
+      document.getElementById('modalEventCourse').textContent = `${ev.courseName} • ${ev.methodText}`;
+      const body = document.getElementById('modalEventBody');
+      body.innerHTML = `
+        <div class="drawer-details">
+          <div class="drawer-row">
+            <span class="drawer-label">Full Course Title</span>
+            <span class="drawer-value">${ev.fullTitle}</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">Instruction Format</span>
+            <span class="drawer-value">${ev.methodText} (${ev.deliveryMode || 'In Person'})</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">Date & Time</span>
+            <span class="drawer-value">${ev.dateKey} | ${formatTime12h(ev.startMin)} - ${formatTime12h(ev.endMin)}</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">Location / Room</span>
+            <span class="drawer-value">${ev.room}</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">Instructor</span>
+            <span class="drawer-value">${ev.instructor}</span>
+          </div>
+          ${ev.scheduleText ? `
+          <div class="drawer-row">
+            <span class="drawer-label">Term Range</span>
+            <span class="drawer-value" style="white-space:pre-line;">${ev.scheduleText}</span>
+          </div>` : ''}
+        </div>
+      `;
+      document.getElementById('eventModal').classList.add('active');
+    }
+
+    /* =========================================================================
+       Navigation Event Listeners
+       ========================================================================= */
+    document.getElementById('btnPrevDay').onclick = () => {
+      selectedDate.setDate(selectedDate.getDate() - 1);
+      renderSchedule();
+    };
+
+    document.getElementById('btnNextDay').onclick = () => {
+      selectedDate.setDate(selectedDate.getDate() + 1);
+      renderSchedule();
+    };
+
+    document.getElementById('btnToday').onclick = () => {
+      selectedDate = new Date();
+      renderSchedule();
+    };
+
+    document.getElementById('btnTomorrow').onclick = () => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      selectedDate = d;
+      renderSchedule();
+    };
+
+    document.getElementById('btnNextEvent').onclick = () => {
+      const curKey = formatDateKey(selectedDate);
+      const futureDates = [...new Set(scheduleEvents.map(e => e.dateKey))]
+        .filter(k => k > curKey)
+        .sort();
+
+      if (futureDates.length > 0) {
+        selectedDate = parseDateKey(futureDates[0]);
+        renderSchedule();
+      } else {
+        alert("No future classes found after this date.");
+      }
+    };
+
+    document.getElementById('datePicker').onchange = (e) => {
+      if (e.target.value) {
+        selectedDate = parseDateKey(e.target.value);
+        renderSchedule();
+      }
+    };
+
+    document.getElementById('zoomSlider').oninput = (e) => {
+      pxPerMinute = parseFloat(e.target.value);
+      renderSchedule();
+    };
+
+    /* =========================================================================
+       Modal Handlers
+       ========================================================================= */
+    function closeModals() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+    }
+
+    document.getElementById('btnOpenFetchModal').onclick = () => {
+      document.getElementById('fetchModal').classList.add('active');
+    };
+
+    document.getElementById('btnOpenExportModal').onclick = () => {
+      document.getElementById('exportArea').value = JSON.stringify(scheduleEvents, null, 2);
+      document.getElementById('exportModal').classList.add('active');
+    };
+
+    function switchDataTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (tab === 'scrape') {
+        event.target.classList.add('active');
+        document.getElementById('tabScrape').style.display = 'block';
+        document.getElementById('tabJson').style.display = 'none';
+      } else {
+        event.target.classList.add('active');
+        document.getElementById('tabScrape').style.display = 'none';
+        document.getElementById('tabJson').style.display = 'block';
+      }
+    }
+
+    /* =========================================================================
+       Fetch Data via Proxy
+       ========================================================================= */
+    document.getElementById('btnRunFetch').onclick = async () => {
+      const urls = document.getElementById('urlInput').value.trim().split('\n').map(u => u.trim()).filter(Boolean);
+      const cookie = document.getElementById('cookieInput').value.trim();
+      const proxy = document.getElementById('proxyInput').value.trim();
+
+      if (urls.length === 0) {
+        alert('Please enter at least one course URL.');
+        return;
+      }
+
+      const btn = document.getElementById('btnRunFetch');
+      btn.textContent = 'Fetching Courses...';
+      btn.disabled = true;
+
+      let successCount = 0;
+      for (const targetUrl of urls) {
+        try {
+          const fetchUrl = proxy ? `${proxy}${encodeURIComponent(targetUrl)}` : targetUrl;
+          const headers = {
+            'accept': 'application/json'
+          };
+          if (cookie) {
+            headers['Cookie'] = cookie;
+          }
+
+          const res = await fetch(fetchUrl, { headers });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data && data.d && data.d.results) {
+            ingestODataResults(data.d.results);
+            successCount++;
+          }
+        } catch (err) {
+          console.warn('Fetch error:', err);
+        }
+      }
+
+      btn.textContent = 'Fetch Courses';
+      btn.disabled = false;
+
+      if (successCount > 0) {
+        closeModals();
+        selectedDate = determineInitialDate();
+        renderSchedule();
+        alert(`Successfully imported ${successCount} course(s)!`);
+      } else {
+        alert("Could not fetch via browser proxy due to CORS/Cookie restrictions. Please copy the response and paste it into the 'Paste Raw JSON' tab!");
+      }
+    };
+
+    /* =========================================================================
+       Import Raw JSON Tab
+       ========================================================================= */
+    document.getElementById('btnImportRawJson').onclick = () => {
+      const text = document.getElementById('rawJsonInput').value.trim();
+      if (!text) {
+        alert('Please paste JSON data first.');
+        return;
+      }
+      try {
+        const json = JSON.parse(text);
+        const results = (json.d && json.d.results) ? json.d.results : (Array.isArray(json) ? json : [json]);
+        ingestODataResults(results);
+        closeModals();
+        selectedDate = determineInitialDate();
+        renderSchedule();
+        alert('Course events parsed and loaded successfully!');
+      } catch (e) {
+        alert('Invalid JSON: ' + e.message);
+      }
+    };
+
+    /* =========================================================================
+       Sample Data Loader (from Prompt)
+       ========================================================================= */
+    document.getElementById('btnLoadSampleData').onclick = () => {
+      const sample = {
+        "d": {
+          "results": [
+            {
+              "AcademicSession": "002",
+              "DShort": "CSE011-LE",
+              "DStext": "CSE-011-LE (002-000)",
+              "EndTime": "PT19H50M00S",
+              "EventDate": "/Date(1790553600000)/",
+              "InstrText": "Benjamin Ochoa",
+              "Method": "LE",
+              "MethodText": "Lecture",
+              "RoomShort": "CENTR 115",
+              "SmObjid": "00008509",
+              "SmStext": "Introduction to Programming and Computational Problem Solving - Accelerated Pace",
+              "StartTime": "PT18H30M00S",
+              "DeliveryModeText": "In Person",
+              "EventSchedule": {
+                "results": [
+                  {
+                    "DayName": "Monday",
+                    "EventDate": "/Date(1790553600000)/",
+                    "StartTime": "PT18H30M00S",
+                    "EndTime": "PT19H50M00S",
+                    "MeetingTypeText": ""
+                  },
+                  {
+                    "DayName": "Wednesday",
+                    "EventDate": "/Date(1790726400000)/",
+                    "StartTime": "PT18H30M00S",
+                    "EndTime": "PT19H50M00S",
+                    "MeetingTypeText": ""
+                  },
+                  {
+                    "DayName": "Monday",
+                    "EventDate": "/Date(1796601600000)/",
+                    "StartTime": "PT19H00M00S",
+                    "EndTime": "PT21H59M00S",
+                    "MeetingTypeText": "Final Examination"
+                  }
+                ]
+              }
+            },
+            {
+              "AcademicSession": "002",
+              "DShort": "CSE011-DI",
+              "DStext": "CSE-011-DI (002-001)",
+              "EndTime": "PT17H50M00S",
+              "EventDate": "/Date(1790208000000)/",
+              "InstrText": "Benjamin Ochoa",
+              "Method": "DI",
+              "MethodText": "Discussion",
+              "RoomShort": "WLH 2005",
+              "SmObjid": "00008509",
+              "SmStext": "Introduction to Programming and Computational Problem Solving - Accelerated Pace",
+              "StartTime": "PT17H00M00S",
+              "DeliveryModeText": "In Person",
+              "EventSchedule": {
+                "results": [
+                  {
+                    "DayName": "Thursday",
+                    "EventDate": "/Date(1790208000000)/",
+                    "StartTime": "PT17H00M00S",
+                    "EndTime": "PT17H50M00S",
+                    "MeetingTypeText": ""
+                  },
+                  {
+                    "DayName": "Thursday",
+                    "EventDate": "/Date(1796256000000)/",
+                    "StartTime": "PT17H00M00S",
+                    "EndTime": "PT17H50M00S",
+                    "MeetingTypeText": ""
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      };
+
+      ingestODataResults(sample.d.results);
+      closeModals();
+      selectedDate = determineInitialDate();
+      renderSchedule();
+      alert('Sample CSE 11 schedule loaded successfully!');
+    };
+
+    /* =========================================================================
+       Export / Import Operations
+       ========================================================================= */
+    document.getElementById('btnCopyExport').onclick = async () => {
+      const area = document.getElementById('exportArea');
+      try {
+        await navigator.clipboard.writeText(area.value);
+        alert('Schedule data copied to clipboard!');
+      } catch (err) {
+        area.select();
+        document.execCommand('copy');
+        alert('Copied to clipboard!');
+      }
+    };
+
+    document.getElementById('btnDownloadExport').onclick = () => {
+      const text = document.getElementById('exportArea').value;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `ucsd_schedule_backup_${formatDateKey(new Date())}.txt`;
+      a.click();
+    };
+
+    document.getElementById('btnApplyImport').onclick = () => {
+      const raw = document.getElementById('exportArea').value.trim();
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          scheduleEvents = parsed;
+          saveToStorage();
+          renderCourseLegend();
+          closeModals();
+          selectedDate = determineInitialDate();
+          renderSchedule();
+          alert('Schedule restored successfully!');
+        } else {
+          alert('Invalid schedule format: root must be an array of meetings.');
+        }
+      } catch (e) {
+        alert('Failed to parse import text: ' + e.message);
+      }
+    };
+
+    document.getElementById('btnClearData').onclick = () => {
+      if (confirm('Clear all stored schedule data from this device?')) {
+        scheduleEvents = [];
+        localStorage.removeItem(STORAGE_KEY);
+        renderCourseLegend();
+        renderSchedule();
+        closeModals();
+      }
+    };
+
+    /* =========================================================================
+       App Initialization
+       ========================================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromStorage();
+      if (scheduleEvents.length === 0) {
+        // Automatically preload the provided sample dataset if brand new
+        document.getElementById('btnLoadSampleData').click();
+      } else {
+        selectedDate = determineInitialDate();
+        renderSchedule();
+      }
+
+      // Auto-update red line marker every minute
+      setInterval(() => {
+        if (formatDateKey(new Date()) === formatDateKey(selectedDate)) {
+          renderSchedule();
+        }
+      }, 60000);
+    });
   </script>
 </body>
 </html>
